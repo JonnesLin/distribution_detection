@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import RidgeClassifier, LogisticRegression
 from sklearn.naive_bayes import CategoricalNB, ComplementNB
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
 
 
 def ks_test(train, test):
@@ -69,7 +70,7 @@ def ttest_ind_fun(train, test):
     return pval
 
 
-def svm_test(train, test, test_size=0.3, kernel_method='rbf', confidence_score=True):
+def svm_test(train, test, test_size=0.3, kernel_method='rbf', confidence_score=True, cv=5):
     '''
     Based on SVM
     :param train: train data
@@ -89,8 +90,9 @@ def svm_test(train, test, test_size=0.3, kernel_method='rbf', confidence_score=T
 
     # create the model
     clf = svm.SVC(kernel=kernel_method)
+    scores = cross_val_score(clf, X, y, cv=cv)
+    score = scores.mean()
     clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
     # scale the similarity into 0~1
@@ -102,7 +104,7 @@ def svm_test(train, test, test_size=0.3, kernel_method='rbf', confidence_score=T
         return clf.decision_function(train), clf.decision_function(test)
 
 
-def knn_test(train, test, test_size=0.3, algorithm='auto'):
+def knn_test(train, test, test_size=0.3, algorithm='auto', cv=5):
     '''
     Based on KNeighbors
     :param train: train data
@@ -121,8 +123,9 @@ def knn_test(train, test, test_size=0.3, algorithm='auto'):
 
     # create the model
     neigh = KNeighborsClassifier(n_neighbors=2, algorithm=algorithm)
+    scores = cross_val_score(neigh, X, y, cv=cv)
+    score = scores.mean()
     neigh.fit(X_train, y_train)
-    score = neigh.score(X_test, y_test)
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
     # scale the similarity into 0~1
@@ -161,7 +164,7 @@ def kmeans_test(train, test, test_size=0.3, algorithm='auto'):
     print('The similarity of train and test data is: %.2f%% ' % similarity)
 
 
-def ridge_test(train, test, test_size=0.3, solver='auto', normalize=True, confidence_score=False):
+def ridge_test(train, test, test_size=0.3, solver='auto', normalize=True, confidence_score=False, cv=5):
     '''
     Based on RidgeClassifier
     :param train: train data
@@ -182,8 +185,9 @@ def ridge_test(train, test, test_size=0.3, solver='auto', normalize=True, confid
 
     # create the model
     clf = RidgeClassifier(solver=solver, normalize=normalize)
+    scores = cross_val_score(clf, X, y, cv=cv)
+    score = scores.mean()
     clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
 
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
@@ -196,7 +200,7 @@ def ridge_test(train, test, test_size=0.3, solver='auto', normalize=True, confid
         return clf.decision_function(train), clf.decision_function(test)
 
 
-def LR_test(train, test, test_size=0.3, solver='lbfgs', confidence_score=False, max_iter=1000):
+def LR_test(train, test, test_size=0.3, solver='lbfgs', confidence_score=False, max_iter=1000, cv=5):
     '''
     Based on LogisticRegression
     :param max_iter: the max iteration
@@ -217,8 +221,9 @@ def LR_test(train, test, test_size=0.3, solver='lbfgs', confidence_score=False, 
 
     # create the model
     clf = LogisticRegression(solver=solver, max_iter=max_iter)
+    scores = cross_val_score(clf, X, y, cv=cv)
+    score = scores.mean()
     clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
 
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
@@ -231,7 +236,7 @@ def LR_test(train, test, test_size=0.3, solver='lbfgs', confidence_score=False, 
         return clf.decision_function(train), clf.decision_function(test)
 
 
-def CNB_test(train, test, test_size=0.3, normalize=True, confidence_score=False):
+def CNB_test(train, test, test_size=0.3, normalize=True, confidence_score=False, cv=5):
     '''
     Based on ComplementNB
     :param normalize: normalize data or not
@@ -251,8 +256,9 @@ def CNB_test(train, test, test_size=0.3, normalize=True, confidence_score=False)
 
     # create the model
     clf = ComplementNB(norm=normalize)
+    scores = cross_val_score(clf, X, y, cv=cv)
+    score = scores.mean()
     clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
 
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
@@ -265,7 +271,7 @@ def CNB_test(train, test, test_size=0.3, normalize=True, confidence_score=False)
         return clf.predict_proba(train), clf.predict_proba(test)
 
 
-def DecTree_test(train, test, test_size=0.3, criterion='gini', max_depth=None, confidence_score=False):
+def DecTree_test(train, test, test_size=0.3, criterion='gini', max_depth=None, confidence_score=False, cv=5):
     '''
     Based on DecisionTreeClassifier
     :param max_depth: The maximum depth of the tree
@@ -286,8 +292,11 @@ def DecTree_test(train, test, test_size=0.3, criterion='gini', max_depth=None, c
 
     # create the model
     clf = DecisionTreeClassifier(criterion=criterion, max_depth=max_depth)
+    scores = cross_val_score(clf, X, y, cv=cv)
+    score = scores.mean()
+
     clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
+
 
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
@@ -300,7 +309,7 @@ def DecTree_test(train, test, test_size=0.3, criterion='gini', max_depth=None, c
         return clf.predict_proba(train), clf.predict_proba(test)
 
 
-def RT_test(train, test, test_size=0.3, criterion='gini', max_depth=None, n_estimators=100, confidence_score=False):
+def RT_test(train, test, test_size=0.3, criterion='gini', max_depth=None, n_estimators=100, confidence_score=False, cv=5):
     '''
     Based on RandomForestClassifier
     :param n_estimators: The number of trees in the forest.
@@ -322,8 +331,10 @@ def RT_test(train, test, test_size=0.3, criterion='gini', max_depth=None, n_esti
 
     # create the model
     clf = RandomForestClassifier(criterion=criterion, max_depth=max_depth, n_estimators=n_estimators)
+    scores = cross_val_score(clf, X, y, cv=cv)
+    score = scores.mean()
     clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
+    # score = clf.score(X_test, y_test,)
 
     # calculate the similarity of train and test parts
     similarity = 0.5 - np.abs(score - 0.5)
@@ -334,3 +345,24 @@ def RT_test(train, test, test_size=0.3, criterion='gini', max_depth=None, n_esti
     # return confidence score
     if confidence_score:
         return clf.predict_proba(train), clf.predict_proba(test)
+
+
+if __name__ == '__main__':
+    from sklearn import datasets
+
+    boston = datasets.load_boston()
+    # concat X and Y and get new X matrix
+    X = boston.data
+    y = boston.target.reshape(-1, 1)
+    # generate our new labels(from train or test dataset)
+    print(len(X))
+    X_train, X_test = ts(X, test_size=0.3)
+
+    svm_test(X_train, X_test)
+    knn_test(X_train, X_test)
+    kmeans_test(X_train, X_test)
+    LR_test(X_train, X_test, max_iter=1e4)
+    ridge_test(X_train, X_test)
+    CNB_test(X_train, X_test)
+    DecTree_test(X_train, X_test)
+    RT_test(X_train, X_test, n_estimators=3, max_depth=5, confidence_score=True)
